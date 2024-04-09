@@ -3,16 +3,25 @@ require('dotenv').config();
 require('colors');
 const cors = require('cors');
 
+const { dbConnection } = require('../database/config.db');
+
 class Server{
 
     constructor(){
         this.app = express();
         this.port = process.env.PORT;
         this.usersRoutePath = '/api/users';
+        //Connection DB
+        this.conectarDb();
         // Inicializacion Middlewares
         this.middlewares();
         // Inicializacion Routes
         this.routes();
+    }
+
+    //DB Init Connection
+    async conectarDb() {
+        await dbConnection();
     }
 
     //Middlewares
