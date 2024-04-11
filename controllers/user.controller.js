@@ -1,30 +1,49 @@
 const { request, response} = require('express');
 const User = require('../models/user');
 const bcryptjs = require('bcryptjs');
+const user = require('../models/user');
 
 
 
-const userGet = ( req = request,res = response)=>{
+const userGet = async ( req = request,res = response)=>{
 
     //Desestructuracion de params
-    const { q, name = 'no name', apiKey = ''} = req.query;
+    //const { q, name = 'no name', apiKey = ''} = req.query;
+    const { limit = 5 , init = 0} = req.query;
+    // const users = await 
+    // const countRegisters = await User.countDocuments({ status:true });
+
+    const [ total, users ] = await Promise.all([
+        User.countDocuments({ status:true }),
+        User.find( {status: true} ).limit(Number(limit))
+            .skip(Number(init))
+    ])
 
         res.json({
-            msg:    'GET API Controller',
-            q,
-            name,
-            apiKey
+          total,
+          users
         });
     
 };
 
-const userPut = ( req = request,res = response)=>{
+const userPut = async( req = request,res = response)=>{
 
     const id = req.params.id;
 
+    const { password, google, email , ...data} = req.body;
+
+    //VALIDAR CONTRA LA BASE DE DATOS
+    if(password){
+        
+          //Encriptar la contraseña
+        const salt = bcryptjs.genSaltSync(10); // Numero de ciclos de encrsiptacion
+        user.password = bcryptjs.hashSync( password, salt ); 
+    }
+
+    const userUpdate = await User.findByIdAndUpdate( id, data );
+
     res.json({
-        msg:    'PUT API Controller',
-        id
+        userUpdate
     });
 
 };
@@ -48,9 +67,15 @@ const userPost = async( req = request,res = response)=>{
 
 };
 
-const userDelete = ( req = request,res = response)=>{
+const userDelete = async( req = request,res = response)=>{
+
+    const  {id }  = req.params;
+
+    const user = await User.findByIdAndUpdate(id,{ status: false });
+
+
     res.json({
-        msg:    'DELETE API Controller'
+        user
     });
 
 };

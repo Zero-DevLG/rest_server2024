@@ -19,7 +19,17 @@ validateIfExistEmailDb = async(email='')=>{
  
 }
 
+validateIfExistUser = async(id)=>{
+    //Verificar si el email existe
+    const existUser = await User.findById( id );
+    if( !existUser){
+       throw new Error(`El usuario con ID : ${ id } no existe`);
+    }
+
+}
+
 module.exports = {
     validateRoleDB,
-    validateIfExistEmailDb
+    validateIfExistEmailDb,
+    validateIfExistUser
 }
