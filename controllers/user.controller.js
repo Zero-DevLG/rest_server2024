@@ -17,7 +17,9 @@ const userGet = async ( req = request,res = response)=>{
         User.countDocuments({ status:true }),
         User.find( {status: true} ).limit(Number(limit))
             .skip(Number(init))
-    ])
+    ]);
+
+    
 
         res.json({
           total,

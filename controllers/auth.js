@@ -38,8 +38,7 @@ const login = async(req = request , res = response)=>{
         const token =  await generateJwt(user.id);
 
         return res.json({
-            email,
-            password,
+            user,
             token,
             msg: 'Login ok'
         })
@@ -52,7 +51,7 @@ const login = async(req = request , res = response)=>{
     }
 
     res.json({
-
+       
         msg: ' Login '
     })
 
