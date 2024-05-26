@@ -2,7 +2,9 @@ const { response , request } = require('express');
 const User = require('../models/user');
 const bcryptjs = require('bcryptjs');
 const { generateJwt } = require('../helpers/generateJWT');
-
+const { googleVerifySign } = require('../helpers/googleVerify');
+const user = require('../models/user');
+ 
 
 const login = async(req = request , res = response)=>{
 
@@ -58,7 +60,71 @@ const login = async(req = request , res = response)=>{
 }
 
 
+const googleSignIn = async( req = request, res=response)=>{
+    
+    const { id_token } = req.body;
+
+    try {
+        const { name, picture , email } = await googleVerifySign( id_token );
+
+        
+       let user = await User.findOne({ email });
+
+        if(!user){
+            // Nuevo registro user
+            const data = {
+                name:       name,
+                email:      email,
+                password:   ':P',
+                img:        picture,
+                google:     true
+            }
+
+            user = new User( data );
+            await user.save();
+
+        }
+
+        // Verificacion de inhabilitacion de usuario
+
+        if(!user.status){
+            return res.status(400).json({
+                ok:     false,
+                msg:    'Favor de contactar con el administrador, Usuario Inhabilitado'
+            });
+        }
+
+        // Creacion del JWT
+
+        const token = await  generateJwt(user.uid);
+
+    
+
+
+       
+        res.status(200).json({
+            ok:         true,
+            msg:        'Usuario verificado con exito',
+            user,
+            token
+          
+        
+        });
+       
+    } catch (error) {
+        res.status(400).json({
+            ok:     false,
+            msg:    'El Token no se pudo verificar',
+            error:  error
+        });
+    }
+
+    
+};
+
+
 
 module.exports = {
-    login
+    login,
+    googleSignIn
 }

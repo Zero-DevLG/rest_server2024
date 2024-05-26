@@ -6,6 +6,71 @@
     <title>Express Server</title>
 </head>
 <body>
-    <h1>Acceso denegado</h1>
+        <div>
+            <h1>Google Sign in</h1>
+            <hr>
+            <div id="g_id_onload"
+            data-client_id="811418104936-9ebi8njirl77b8t03246e2788heo4v7q.apps.googleusercontent.com"
+            data-auto_prompt="false"
+            data-callback="handleCredentialResponse">
+        </div>
+        <div class="g_id_signin"
+            data-type="standard"
+            data-size="large"
+            data-theme="outline"
+            data-text="sign_in_with"
+            data-shape="rectangular"
+            data-logo_alignment="left">
+        </div>
+        <hr>
+        <div>
+            <button id="logout-google">Cerrar sesión</button>
+        </div>
+
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <script>
+        function handleCredentialResponse(response) {
+            
+            // Google TOKEN 
+
+           const body = { id_token: response.credential };
+
+           fetch('http://localhost:1000/api/auth/google',{
+                method: 'POST',
+                headers:{
+                    'Content-Type' : 'application/json'
+                },
+                body:JSON.stringify(body)
+
+           })
+                .then( resp=> resp.json())
+                    .then( resp =>{
+                        console.log(resp);
+                        localStorage.setItem('email',resp.user.email);
+                    })
+                    .catch( console.warn);
+      
+         
+        }
+
+        const button = document.getElementById('logout-google');
+        button.onclick = () => {
+                if(localStorage.getItem('email')){
+                    google.accounts.id.disableAutoSelect();
+                    google.accounts.id.revoke( localStorage.getItem('email'), done => {
+                    localStorage.clear();
+                    location.reload();
+                });
+            }else{
+                console.log('No hay una sesion iniciada');
+            }
+         
+        }
+
+      </script>
+      
+
 </body>
 </html>
